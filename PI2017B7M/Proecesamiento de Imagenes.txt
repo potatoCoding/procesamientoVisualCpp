@@ -1,0 +1,76 @@
+14/8/17
+Definicion formal de Imagen
+Una Imagen I es una fucnion definida asi:
+     
+     I: NxN -> P
+    Donde I es la Funcion de Imagen, 
+    N: EL conjunto de los numeros naturales
+    P: Es el conjunto de los pixeles
+
+¿que es el conjunto P?
+    El conjunto P por lo general es un subconjunto de N^n, es decir, el conjunto potencia de los numeros naturales
+    siendo n cualquier elemento de N
+Si N^1 = N
+Si N^2 = {(a,b) | a,b in N}
+Si N^3 = {(a,b,c) | a,b,c in N}
+
+Los pixeles p que pertenecen a P son entonces una tupla de numeros enteros de kernel n
+
+Las Imagenes se pueden reprecentar como un conjunto de pixeles en otros conjuntos distintos a los numeros enteros.
+Pero siempre estaran controlados o identificados mediante NxN, es decir, P puede quedar definido bajo qualquier otro contunto.
+
+Si se requiere que un pixel quede definido en terminos de flotantes, entonces es F el conjunto de los flotantes, por lo tanto: P = F^n
+
+-- Reprecentacion interna de una imagen en el computador
+Sea M la memoria del computador, la cual esta definida asi:
+    M: N -> N   ==>   v=M(a)
+a: address
+v: value
+
+Para implementar una imagen I en una memoria lineal M moderna se tendra que contruir el mapeo (Funcion) siguiente:
+      (i,j) -> a}     Reducion de N^2 a N^1
+    L: NxN,I   -> N}
+    L"Linealizacion"
+Las Imagenes en el computador estan acotadas en sus dimenciones X,Y por un determinado numero total de pixel, entonces
+podemos crear o definif 2 propiedades (Funciones) que nos imformen acerca de sus dimenciones:
+    sizeX(I) : (NxN -> P) -> N
+    sizeY(I) : (NxN -> P) -> N
+Con la anterior especificacion de propiedades es posible crear una fucnion L que transforme de NxN -> N asi:
+    L((i,j) in NxN, I) : a in N, a=j*sizeX(I)+i
+
+18/9/17
+	Transformaciones afines de imagenes
+Rotar, escalar y trasladar imagenes requiere de una transformacion algebraica de tipo afin.
+
+Una transformacion afin es aquella quenesta compuesta de una transformacion lineal y una traslacion.
+	V' = M*V + T
+
+Para reducir la complejidad del manejo de la traslacion como una transformacion afin, se utiliza un espacio de orden superior para inscrustar a la transformacion del orden 
+inferior como parte de una transformacion lineal del orden superior.
+	-> V'=M*V
+		(Combinar linealmente con)
+
+Transformacion de escalacion:
+	S(sx, sy) = [
+				[sx, 0, 0]
+				[0, sy, 0]
+				[0,  0, 1]
+				]
+	Sea V=[x, y, z] entonces V' = S(sx, sy)*V= [sx*x, sy*y, z]
+
+Transformacion de rotacion:
+	R(Theta) =	[cos(theta) -sin(theta)  0]
+				[sin(theta) cos(theta)   0]
+				[    0           0       1]
+
+Transformacion de traslacion:
+	T(dx, dy) = [1   0   dx]
+				[0   1   dy]
+				[0   0    1]
+		Si V=(x, y, x) entonces V'=T*V
+			V' = (x+dx*z, y+dy*z, z)
+
+Si se desea trasladar, luego girar y luego escalar, entonces la combinacion o concatenacion de matrices entonces se cosntruye una sola matriz con los efectos
+combinados en ese orden
+		M = T(dx, dy) * R(theta) * S(sx, sy)
+	Nota: Recordsr que la combinacion o concatenacion de matrices no es conmutativa
