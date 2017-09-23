@@ -26,8 +26,8 @@ CIPImage::PIXEL HorizontalDerivate(int i, int j, CIPImage* Inputs[], int nArgs) 
 	return Color;
 }
 
-Matrix3D g_M;
-float p;
+Matrix3D g_M = zero();
+float p = 0;
 CIPImage::PIXEL InverseMapping(int i, int j, CIPImage* pInputs[], int nImputs) {
 	vector3D source = { i,j,1,0 };
 	vector3D dest = source * g_M;
