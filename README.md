@@ -1,5 +1,15 @@
 # procesamientoVisualCpp
 Cornejo Procesamiento de Imagenes<br/>
 - Tiene problemas con los colores al guardar imagnes (solo 24 bits)
-<h3> 18/9/17</h3>
+# 22/9/17 Girar Captura de Pantalla en debug no funciona en release
+Agregadas fucniones:
+- Matrix3D Identity(); 
+- Matrix3D zero(); 
+- Matrix3D Scaling(float sx, float sy); 
+- Matrix3D Rotation(float thetha); 
+- Matrix3D Translate(float dx, float dy); 
+- Matrix3D operator*(Matrix3D& A, Matrix3D& B); 
+- vector3D operator*(vector3D& V, Matrix3D& M);//Matrix M must first be transposed!!! 
+- Matrix3D Transpose(Matrix3D& M); 
+# 18/9/17
 Agregadas estructuras Vector y Matrix 3D
