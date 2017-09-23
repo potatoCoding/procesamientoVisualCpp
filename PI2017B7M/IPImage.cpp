@@ -4,8 +4,11 @@
 
 CIPImage::PIXEL & CIPImage::operator()(int i, int j)
 {
-	// TODO: insert return statement here
-	return *(m_pBuffer + j*m_nSizex + i);
+	static PIXEL dummy;
+	if (i >= 0 && i < m_nSizex && j >= 0 && j < m_nSizey)
+		return *(m_pBuffer + j*m_nSizex + i);
+	else
+		return dummy;
 }
 
 CIPImage * CIPImage::createImage(int sx, int sy)

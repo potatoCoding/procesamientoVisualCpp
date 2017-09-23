@@ -1,7 +1,10 @@
 #include <Windows.h>
 #include <commdlg.h>
 #include "IPImage.h"
+#include "Matrix3D.h"
+
 /* Soft pixel shader c++ */
+
 CIPImage::PIXEL Shader(int i, int j, CIPImage* Inputs[], int nArgs) {
 	CIPImage::PIXEL Color = { 20,20,80,0 };
 	return Color;
@@ -23,8 +26,8 @@ CIPImage::PIXEL HorizontalDerivate(int i, int j, CIPImage* Inputs[], int nArgs) 
 	return Color;
 }
 
-Matrix3D g_M = zero();
-float p = 0;
+Matrix3D g_M;
+float p;
 CIPImage::PIXEL InverseMapping(int i, int j, CIPImage* pInputs[], int nImputs) {
 	vector3D source = { i,j,1,0 };
 	vector3D dest = source * g_M;
@@ -41,6 +44,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		//switch tecla pulsada
 		switch (wParam)
 		{
+		case 'A': p += 0.01f; InvalidateRect(hWnd, 0, 0); break;
+		case 'D': p -= 0.01f; InvalidateRect(hWnd, 0, 0); break;
 			case 'C':
 				if (pInput)
 					CIPImage::destroyImage(pInput);
@@ -96,23 +101,25 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				*/
 #pragma endregion
 				//Cargar Nomral
-				PAINTSTRUCT ps;
+				/*PAINTSTRUCT ps;
 				HDC hdc = BeginPaint(hWnd, &ps);
 				if (pInput)
 					pInput->draw(hdc, 0, 0);
-				EndPaint(hWnd, &ps);
+				EndPaint(hWnd, &ps);*/
 			
 				//cargar con shader
-				/*PAINTSTRUCT ps;
+				PAINTSTRUCT ps;
 				HDC hdc = BeginPaint(hWnd, &ps);
 				RECT rc;
 				GetClientRect(hWnd, &rc);
 				CIPImage* pOutput = CIPImage::createImage(max(10, rc.right), max(10, rc.bottom));
+				g_M = Rotation(p);
 				if (pInput)
-					pOutput->process(Negative, &pInput, 1);
+					pOutput->process(InverseMapping, &pInput, 1);
+				//pOutput->process(Negative, &pInput, 1);
 				pOutput->draw(hdc, 0, 0);
 				CIPImage::destroyImage(pOutput);
-				EndPaint(hWnd, &ps);*/
+				EndPaint(hWnd, &ps);
 			}
 			return 0;
 			break;
@@ -191,6 +198,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpzCmdLin
 	}
 	CIPImage::destroyImage(pImage);*/
 #pragma endregion
+	vector3D V = { 1,2,3,0 };//w debe ser siempre 0
+	Matrix3D I = Transpose(Identity());
+	vector3D P = V*I;
+
 	RegistrarClaseVentana(hInstance);
 	crearVentana(hInstance, nCmdShow);
 	/*bucle de mensajes = bomba de mensajes
