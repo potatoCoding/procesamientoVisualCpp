@@ -2,9 +2,10 @@
 
 struct vector3D
 {
+	//4 dimensiones por eficiencia computacional
 	union {
-		struct 	{ float x, y, z;};
-		float v[3];
+		struct 	{ float x, y, z, w;};
+		float v[4];
 	};
 };
 
@@ -23,3 +24,11 @@ struct Matrix3D
 };
 
 float Dot(vector3D& A, vector3D& B);
+Matrix3D Identity();
+Matrix3D zero();
+Matrix3D Scaling(float sx, float sy);
+Matrix3D Rotation(float thetha);
+Matrix3D Translate(float dx, float dy);
+Matrix3D operator*(Matrix3D& A, Matrix3D& B);
+vector3D operator*(vector3D& V, Matrix3D& M);//Matrix M must first be transposed!!!
+Matrix3D Transpose(Matrix3D& M);
