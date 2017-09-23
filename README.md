@@ -1,5 +1,6 @@
 # procesamientoVisualCpp
 Cornejo Procesamiento de Imagenes<br/>
+- Echo en vsCommunity 2017
 - Tiene problemas con los colores al guardar imagnes (solo 24 bits)
 # 22/9/17 Girar Captura de Pantalla en debug no funciona en release
 Agregadas fucniones:
