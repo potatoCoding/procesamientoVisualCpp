@@ -22,6 +22,14 @@ CIPImage::PIXEL HorizontalDerivate(int i, int j, CIPImage* Inputs[], int nArgs) 
 	Color.b = max(min(255, 127 + (int)A.b - B.b), 0);
 	return Color;
 }
+
+Matrix3D g_M = zero();
+float p = 0;
+CIPImage::PIXEL InverseMapping(int i, int j, CIPImage* pInputs[], int nImputs) {
+	vector3D source = { i,j,1,0 };
+	vector3D dest = source * g_M;
+	return (*pInputs[0])((int)dest.x, (int)dest.y);
+}
 //1- procedimiento ventana: tiene como objetivo procesar todos los eventos que el usuao y sistema generen.
 //La iplementacion de estas repuesas define el comportamiento de la aplicacion
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -116,7 +124,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return 0;
 			break;
 		case WM_CLOSE:
-			if (IDYES == MessageBox(hWnd, L"¿Desea Salir?", L"Salir", MB_ICONQUESTION | MB_YESNO))
+			if (IDYES == MessageBox(hWnd, L"ï¿½Desea Salir?", L"Salir", MB_ICONQUESTION | MB_YESNO))
 				DestroyWindow(hWnd);
 			break;
 		default:
