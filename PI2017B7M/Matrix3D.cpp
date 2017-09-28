@@ -69,9 +69,14 @@ Matrix3D operator*(Matrix3D& A, Matrix3D& B) {
 	return R;
 }
 
+//Define usar ensamblador o c++
+#define USE_ASM 1
+
 vector3D operator*(vector3D& V, Matrix3D& M) 
 {//Matrix M must first be transposed!!!
 	vector3D R;
+#ifdef USE_ASM
+	//Version ensamblador
 	__asm {
 		/*[x, y, z] *[m00, m01, m02]
 					 [m10, m11, m12]
@@ -82,28 +87,60 @@ vector3D operator*(vector3D& V, Matrix3D& M)
 		/*[x, y, z] *[m00, m10, m20]
 					 [m01, m11, m21]
 					 [m02, m12, m22]*/
-		mov esi,V
-		mov edi,M
-		movups xmm0,[esi]
-		movups xmm1,[edi]
-		movups xmm2,[edi+16]
-		movups xmm3,[edi+32]
-		mulps  xmm1,xmm0
-		mulps  xmm2,xmm0
-		mulps  xmm3,xmm0
-		haddps xmm1,xmm1//x'
-		haddps xmm2,xmm2//y'
-		haddps xmm3,xmm3//z'
-		haddps xmm1, xmm1//x'
-		haddps xmm2, xmm2//y'
-		haddps xmm3, xmm3//z'
-		lea	   esi,R
-		movd   [esi],xmm1
-		movd   [esi+4],xmm2
-		movd   [esi+8],xmm3
-		xor    eax,eax
-		mov    [esi+12],eax
+#pragma region old code solo en debug
+		//mov esi,V
+		//mov edi,M
+		//movups xmm0,[esi]
+		//movups xmm1,[edi]
+		//movups xmm2,[edi+16]
+		//movups xmm3,[edi+32]
+		//mulps  xmm1,xmm0
+		//mulps  xmm2,xmm0
+		//mulps  xmm3,xmm0
+		//haddps xmm1,xmm1//x'
+		//haddps xmm2,xmm2//y'
+		//haddps xmm3,xmm3//z'
+		//haddps xmm1, xmm1//x'
+		//haddps xmm2, xmm2//y'
+		//haddps xmm3, xmm3//z'
+		//lea	   esi,R
+		//movd   [esi],xmm1
+		//movd   [esi+4],xmm2
+		//movd   [esi+8],xmm3
+		//xor    eax,eax
+		//mov    [esi+12],eax
+#pragma endregion
+		
+		//Debug y release
+		mov    eax,V
+		mov    ebx,M
+		movups xmm0,[ebx]
+		movups xmm1,[ebx+16]
+		movups xmm2,[ebx+32]
+		movups xmm3,[eax]
+		mulps  xmm0,xmm3
+		mulps  xmm1,xmm3
+		mulps  xmm2,xmm3
+		xorps  xmm3,xmm3
+		haddps xmm0, xmm0//x'
+		haddps xmm1, xmm1//y'
+		haddps xmm2, xmm2//z'
+		haddps xmm0, xmm0//x'
+		haddps xmm1, xmm1//y'
+		haddps xmm2, xmm2//z'
+		unpcklps xmm0,xmm1//[d,c,b,a] unpcklps [h,g,f,e] -> [f,b,e,a]
+		unpckhps xmm2,xmm3//[d,c,b,a] unpckhps [h,g,f,e] -> [h,d,g,c]
+		shufps xmm0,xmm2,0xe4
+		movups R,xmm0
+
 	}
+#else
+	//Vercion C++
+	R.x = M.m00*V.x + M.m01*V.y + M.m02*V.z;
+	R.y = M.m10*V.x + M.m11*V.y + M.m12*V.z;
+	R.z = M.m20*V.x + M.m21*V.y + M.m22*V.z;
+	R.w = 0;
+#endif // USE_ASM
 	return R;
 
 }

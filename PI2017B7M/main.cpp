@@ -12,14 +12,14 @@ CIPImage::PIXEL Shader(int i, int j, CIPImage* Inputs[], int nArgs) {
 
 CIPImage::PIXEL Negative(int i, int j, CIPImage* Inputs[], int nArgs) {
 	auto Color = (*Inputs)[0](i, j);
-	CIPImage::PIXEL Dest = { ~Color.b, ~Color.g, ~Color.r, 0 };
+	CIPImage::PIXEL Dest = { (unsigned char)~Color.b, (unsigned char)~Color.g, (unsigned char)~Color.r, 0 };
 	return Dest;
 }
 
 CIPImage::PIXEL HorizontalDerivate(int i, int j, CIPImage* Inputs[], int nArgs) {
 	CIPImage::PIXEL Color, A, B;
-	A = (*Inputs[0])(i - 1, j);
-	B = (*Inputs[0])(i + 1, j);
+	A = (*Inputs[0])((unsigned char)i - 1, (unsigned char)j);
+	B = (*Inputs[0])((unsigned char)i + 1, (unsigned char)j);
 	Color.r = max(min(255, 127 + (int)A.r - B.r), 0);
 	Color.g = max(min(255, 127 + (int)A.g - B.g), 0);
 	Color.b = max(min(255, 127 + (int)A.b - B.b), 0);
@@ -27,9 +27,8 @@ CIPImage::PIXEL HorizontalDerivate(int i, int j, CIPImage* Inputs[], int nArgs) 
 }
 
 Matrix3D g_M = zero();
-float p = 0;
 CIPImage::PIXEL InverseMapping(int i, int j, CIPImage* pInputs[], int nImputs) {
-	vector3D source = { i,j,1,0 };
+	vector3D source = { (float)i,(float)j,1,0 };
 	vector3D dest = source * g_M;
 	return (*pInputs[0])((int)dest.x, (int)dest.y);
 }
@@ -37,15 +36,47 @@ CIPImage::PIXEL InverseMapping(int i, int j, CIPImage* pInputs[], int nImputs) {
 //La iplementacion de estas repuesas define el comportamiento de la aplicacion
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	static CIPImage* pInput;
+	static float p = 0;
+	static float px = 0, py = 0;
+	static float mx = 0, my = 0;
+	static float sx = 1.0f, sy = 1.0f;
+	static float lastx, lasty;
+	static bool bDragging = false;
 	//despachar los diferentes mensajes de la ventana
 	switch (msg)
 	{
+	case WM_LBUTTONDOWN:
+		lastx = LOWORD(lParam);
+		lasty = HIWORD(lParam);
+			mx = LOWORD(lParam);
+			my = HIWORD(lParam);
+		bDragging = true;
+ 		break;
+	case WM_MOUSEMOVE:
+			mx = LOWORD(lParam);
+			my = HIWORD(lParam);
+		if (bDragging) {
+			int x = LOWORD(lParam), y = HIWORD(lParam);
+			int dx = x - lastx;
+			int dy = y - lasty;
+			px += dx;
+			py += dy;
+			lastx = x;
+			lasty = y;
+			InvalidateRect(hWnd, NULL, false);
+		}
+		break;
+	case WM_LBUTTONUP:
+			bDragging = false;
+			break;
 	case WM_KEYDOWN:
 		//switch tecla pulsada
 		switch (wParam)
 		{
-		case 'A': p += 0.01f; InvalidateRect(hWnd, 0, 0); break;
-		case 'D': p -= 0.01f; InvalidateRect(hWnd, 0, 0); break;
+			case 'Q': p += 0.01f; InvalidateRect(hWnd, 0, 0); break;
+			case 'E': p -= 0.01f; InvalidateRect(hWnd, 0, 0); break;
+			case 'Z': sx += 0.01f; sy += 0.01f; InvalidateRect(hWnd, 0, 0); break;
+			case 'X': sx -= 0.01f; sy -= 0.01f; InvalidateRect(hWnd, 0, 0); break;
 			case 'C':
 				if (pInput)
 					CIPImage::destroyImage(pInput);
@@ -112,10 +143,19 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				HDC hdc = BeginPaint(hWnd, &ps);
 				RECT rc;
 				GetClientRect(hWnd, &rc);
-				CIPImage* pOutput = CIPImage::createImage(max(10, rc.right), max(10, rc.bottom));
-				g_M = Rotation(p);
-				if (pInput)
-					pOutput->process(InverseMapping, &pInput, 1);
+				CIPImage* pOutput = CIPImage::createImage(max(10, rc.right), max(10, rc.bottom));				
+				if (pInput) {
+					g_M = Transpose(						
+						
+						Translate(-mx, -my)*
+						Scaling(sx, sy)*
+						Translate(mx, my)*
+						Translate(-px, -py)*
+						Translate((float)-(pInput->getSizeX() / 2), (float)-(pInput->getSizeY() / 2))*
+						Transpose(Rotation(-p))*
+						Translate((float)(pInput->getSizeX() / 2), (float)(pInput->getSizeY() / 2)));
+					pOutput->process(InverseMapping, &pInput, 1);	
+				}
 				//pOutput->process(Negative, &pInput, 1);
 				pOutput->draw(hdc, 0, 0);
 				CIPImage::destroyImage(pOutput);
@@ -131,7 +171,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return 0;
 			break;
 		case WM_CLOSE:
-			if (IDYES == MessageBox(hWnd, L"�Desea Salir?", L"Salir", MB_ICONQUESTION | MB_YESNO))
+			if (IDYES == MessageBox(hWnd, L"¿Desea Salir?", L"Salir", MB_ICONQUESTION | MB_YESNO))
 				DestroyWindow(hWnd);
 			break;
 		default:

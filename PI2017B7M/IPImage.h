@@ -20,6 +20,8 @@ protected:
 	int m_nSizex;
 	int m_nSizey;
 public:
+	int getSizeX() { return m_nSizex; };
+	int getSizeY() { return m_nSizey; };
 	PIXEL& operator()(int i, int j);
 	static CIPImage* createImage(int sx, int sy);
 	static void destroyImage(CIPImage* pToDestroy);
