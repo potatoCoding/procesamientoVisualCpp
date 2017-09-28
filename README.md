@@ -2,6 +2,11 @@
 Cornejo Procesamiento de Imagenes<br/>
 - Echo en vsCommunity 2017
 - Tiene problemas con los colores al guardar imagnes (solo 24 bits)
+# 25/9/17
+Agregada fucnionalidad:
+- zoom
+- rotacion
+- traslacion
 # 22/9/17 Girar Captura de Pantalla en debug no funciona en release
 Agregadas fucniones:
 - Matrix3D Identity(); 
