@@ -2,6 +2,8 @@
 Cornejo Procesamiento de Imagenes<br/>
 - Echo en vsCommunity 2017
 - Tiene problemas con los colores al guardar imagnes (solo 24 bits)
+# 6/10/17
+Agregada Interpolacion Bilineal
 # 25/9/17
 Agregada fucnionalidad:
 - zoom
