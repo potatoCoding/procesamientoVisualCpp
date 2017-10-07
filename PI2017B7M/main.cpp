@@ -30,7 +30,7 @@ Matrix3D g_M = zero();
 CIPImage::PIXEL InverseMapping(int i, int j, CIPImage* pInputs[], int nImputs) {
 	vector3D source = { (float)i,(float)j,1,0 };
 	vector3D dest = source * g_M;
-	return (*pInputs[0])((int)dest.x, (int)dest.y);
+	return pInputs[0]->sample(dest.x, dest.y);
 }
 //1- procedimiento ventana: tiene como objetivo procesar todos los eventos que el usuao y sistema generen.
 //La iplementacion de estas repuesas define el comportamiento de la aplicacion

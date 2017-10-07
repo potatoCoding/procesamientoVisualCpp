@@ -74,3 +74,5 @@ Si se desea trasladar, luego girar y luego escalar, entonces la combinacion o co
 combinados en ese orden
 		M = T(dx, dy) * R(theta) * S(sx, sy)
 	Nota: Recordsr que la combinacion o concatenacion de matrices no es conmutativa
+
+Interpolacion Bilineal

@@ -11,6 +11,38 @@ CIPImage::PIXEL & CIPImage::operator()(int i, int j)
 		return dummy;
 }
 
+CIPImage::PIXEL Lerp(CIPImage::PIXEL& A, CIPImage::PIXEL& B, float u) {
+	
+	CIPImage::PIXEL C;// P=A+u*(B-A)
+	C.r = (unsigned char)(A.r + u*((int)B.r - A.r));
+	C.g = (unsigned char)(A.g + u*((int)B.g - A.g));
+	C.b = (unsigned char)(A.b + u*((int)B.b - A.b));
+	C.a = 0xff;
+	return C;
+}
+
+CIPImage::PIXEL CIPImage::sample(float i, float j)
+{
+	int x = (int)i, y = (int)j;
+	float p = i - x, q = j - y;
+	PIXEL A, B , C, D;
+	int a = max(0, min(m_nSizex - 1, x));
+	int b = max(0, min(m_nSizex - 1, x + 1));
+	int c = max(0, min(m_nSizey - 1, y));
+	int d = max(0, min(m_nSizey - 1, y + 1));
+	A = (*this)(a, c);
+	B = (*this)(b, c);
+	C = (*this)(a, d);
+	D = (*this)(b, d);
+	
+	/*A = (*this)(x, y);
+	B = (*this)(x+1, y);
+	C = (*this)(x, y+1);
+	D = (*this)(x+1, y+1);*/
+
+	return Lerp(Lerp(A, B, p), Lerp(C, D, p), q);
+}
+
 CIPImage * CIPImage::createImage(int sx, int sy)
 {
 	CIPImage* pImage = new CIPImage();

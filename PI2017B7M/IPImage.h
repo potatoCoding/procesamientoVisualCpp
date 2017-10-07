@@ -23,6 +23,7 @@ public:
 	int getSizeX() { return m_nSizex; };
 	int getSizeY() { return m_nSizey; };
 	PIXEL& operator()(int i, int j);
+	PIXEL sample(float i, float j);
 	static CIPImage* createImage(int sx, int sy);
 	static void destroyImage(CIPImage* pToDestroy);
 	static CIPImage* CaptureDesktop();
