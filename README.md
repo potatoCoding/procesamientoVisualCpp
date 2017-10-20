@@ -1,7 +1,9 @@
 # procesamientoVisualCpp
 Cornejo Procesamiento de Imagenes<br/>
 - Echo en vsCommunity 2017
-- Tiene problemas con los colores al guardar imagnes (solo 24 bits)
+- Tiene problemas con los colores al guardar imagnes (solo 24 bits
+# 20/10/17
+Agregadomatriz de procesamiento 3x3
 # 6/10/17
 Agregada Interpolacion Bilineal
 # 25/9/17
