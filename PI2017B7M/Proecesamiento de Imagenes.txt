@@ -76,3 +76,10 @@ combinados en ese orden
 	Nota: Recordsr que la combinacion o concatenacion de matrices no es conmutativa
 
 Interpolacion Bilineal
+
+Convolucion
+	Integral (f(t)*g(t-tau),dtou)
+En 2D Superficie
+	Integral(I(i,j)*K(i-x,j-y)dxdy)
+La convolucion discreta es una sigma de Riemann
+Sigma((x,y)=(0,0),(sx-1,sy-1),I(i,j)*K(i-x,j-y))

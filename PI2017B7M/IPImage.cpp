@@ -81,7 +81,7 @@ CIPImage * CIPImage::CaptureDesktop()
 
 #include <fstream>
 using namespace std;
-CIPImage * CIPImage::loadFromFile(char * pszFileName)
+CIPImage * CIPImage::loadFromFile(char * pszFileName)//Tarea
 {
 	fstream in;
 	in.open(pszFileName, ios::in | ios::binary);
@@ -223,7 +223,7 @@ CIPImage * CIPImage::loadFromFile(char * pszFileName)
 
 #include <fstream>
 using namespace std;
-void CIPImage::saveToFile(char * pszFileName, CIPImage * pToSave)
+void CIPImage::saveToFile(char * pszFileName, CIPImage * pToSave)//Tarea
 {
 	//variables
 	BITMAPFILEHEADER bfh;
@@ -291,6 +291,7 @@ void CIPImage::saveToFile(char * pszFileName, CIPImage * pToSave)
 
 	out.close();
 }
+
 void CIPImage::draw(HDC hdc, int x, int y)
 {
 	/*1- Crear una memoria en espacio de kernel con el formato de salida (hdc)*/

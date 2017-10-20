@@ -32,6 +32,37 @@ CIPImage::PIXEL InverseMapping(int i, int j, CIPImage* pInputs[], int nImputs) {
 	vector3D dest = source * g_M;
 	return pInputs[0]->sample(dest.x, dest.y);
 }
+
+float Kernel3x3[3][3] = { 
+	{0,0.25,0}, 
+	{-0.25,0,0.25},
+	{0,-0.25,0} 
+};
+float C = 127;
+vector3D Mul(CIPImage::PIXEL p, float s) {
+	return { p.b*s, p.g*s, p.r*s, 0 };
+}
+
+CIPImage::PIXEL Convole3x3(int i, int j, CIPImage* pInputs[], int nImputs) {
+	vector3D S = { 0,0,0,0 };
+	for (int y = -1; y < 2; y++)
+	{
+		for (int x = -1; x < 2; x++) 
+		{
+			vector3D C = Mul((*pInputs[0])(i+x, j+y), Kernel3x3[y+1][x+1]);
+			S.x += C.x;
+			S.y += C.y;
+			S.z += C.z;
+		}
+	}
+	CIPImage::PIXEL R;
+	R.b = (unsigned char)(max(0, min(255, S.x+C)));
+	R.g = (unsigned char)(max(0, min(255, S.y+C)));
+	R.r = (unsigned char)(max(0, min(255, S.z+C)));
+	R.a = 0xff;
+	return R;
+}
+
 //1- procedimiento ventana: tiene como objetivo procesar todos los eventos que el usuao y sistema generen.
 //La iplementacion de estas repuesas define el comportamiento de la aplicacion
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -154,7 +185,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						Translate((float)-(pInput->getSizeX() / 2), (float)-(pInput->getSizeY() / 2))*
 						Transpose(Rotation(-p))*
 						Translate((float)(pInput->getSizeX() / 2), (float)(pInput->getSizeY() / 2)));
-					pOutput->process(InverseMapping, &pInput, 1);	
+					pOutput->process(Convole3x3, &pInput, 1);	
 				}
 				//pOutput->process(Negative, &pInput, 1);
 				pOutput->draw(hdc, 0, 0);
