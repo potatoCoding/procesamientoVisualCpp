@@ -2,9 +2,10 @@
 #include <commdlg.h>
 #include "IPImage.h"
 #include "Matrix3D.h"
+#include "..\AtWareVC32Lib\AtWareVideoCapture.h"
 
+IAtWareVideoCapture* g_pVC;
 /* Soft pixel shader c++ */
-
 CIPImage::PIXEL Shader(int i, int j, CIPImage* Inputs[], int nArgs) {
 	CIPImage::PIXEL Color = { 20,20,80,0 };
 	return Color;
@@ -114,6 +115,13 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				pInput = CIPImage::CaptureDesktop();
 				InvalidateRect(hWnd, 0, 0);//Repintar
 			break;
+			case 'V':
+				if (g_pVC->EnumAndChooseCaptureDevice()) {
+					g_pVC->BuildStreamGraph();
+					g_pVC->ShowPreviewWindow(true);
+					g_pVC->Start();
+				}			
+				break;
 			case 'F':
 			{
 				OPENFILENAMEA Ofn;
@@ -185,7 +193,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						Translate((float)-(pInput->getSizeX() / 2), (float)-(pInput->getSizeY() / 2))*
 						Transpose(Rotation(-p))*
 						Translate((float)(pInput->getSizeX() / 2), (float)(pInput->getSizeY() / 2)));
-					pOutput->process(Convole3x3, &pInput, 1);	
+					//pOutput->process(Convole3x3, &pInput, 1);	
+					pOutput->process(InverseMapping, &pInput, 1);	
 				}
 				//pOutput->process(Negative, &pInput, 1);
 				pOutput->draw(hdc, 0, 0);
@@ -273,8 +282,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpzCmdLin
 	Matrix3D I = Transpose(Identity());
 	vector3D P = V*I;
 
+	printf("");
+	wprintf(L"");
 	RegistrarClaseVentana(hInstance);
-	crearVentana(hInstance, nCmdShow);
+	HWND hWnd = crearVentana(hInstance, nCmdShow);
+	g_pVC = CreateAtWareVideoCapture();
+	g_pVC->Initialize(hWnd);
 	/*bucle de mensajes = bomba de mensajes
 	recibir y confirmar de recibido todos los mensajes que llegen a este proceso. 
 	El bucle de mensaje, lee cada mensaje y decide si despacha o no mensaje al procedimiento venatana correspondiente*/

@@ -251,8 +251,8 @@ void CIPImage::saveToFile(char * pszFileName, CIPImage * pToSave)//Tarea
 	bih.biPlanes = 1;
 	bih.biBitCount = 24;
 	bih.biCompression = BI_RGB;
-	unsigned int rowLength = (pToSave->m_nSizex + 3) & ~3;
-	//unsigned int rowLength = 4 * ((bih.biWidth*bih.biBitCount + 31) / 32);
+	//unsigned int rowLength = (pToSave->m_nSizex + 3) & ~3;
+	unsigned int rowLength = 4 * ((bih.biWidth*bih.biBitCount + 31) / 32);
 	bih.biSizeImage = (rowLength * 24 * pToSave->m_nSizey) / 8;
 	//bih.biSizeImage = 0;
 	//bih.biXPelsPerMeter = 3780;
@@ -271,17 +271,18 @@ void CIPImage::saveToFile(char * pszFileName, CIPImage * pToSave)//Tarea
 	out.write((char*)&bih, sizeof(BITMAPINFOHEADER));	
 	for (int j = bih.biHeight - 1; j >= 0; j--) {
 		int c = 0;
-		for (int i = 0; i < rowLength; i += 4) {
+		for (int i = 0; i < rowLength; i += 16) {
 			/*unsigned char rToSave = (*pToSave)(i + 2, j).r & RedMask;
 			unsigned char gToSave = (*pToSave)(i + 1, j).g & GreenMask;
 			unsigned char bToSave = (*pToSave)(i, j).b & BlueMask;
 			out.write((char*)&rToSave, sizeof(PIXEL));
 			out.write((char*)&gToSave, sizeof(PIXEL));
 			out.write((char*)&bToSave, sizeof(PIXEL));*/
-			out.write((char*)&((*pToSave)(i - 2, j).r), sizeof(PIXEL));
-			out.write((char*)&((*pToSave)(i - 1, j).g), sizeof(PIXEL));
-			out.write((char*)&((*pToSave)(i, j).b), sizeof(PIXEL));
-			c++;
+			//out.write((char*)&((*pToSave)(c, j).a), sizeof(PIXEL));
+			out.write((char*)&((*pToSave)(c, j).b), sizeof(PIXEL));
+			out.write((char*)&((*pToSave)(c , j).g), sizeof(PIXEL));
+			out.write((char*)&((*pToSave)(c , j).r), sizeof(PIXEL));
+			c += 1;
 		}
 	}
 	//Guardar
