@@ -1,7 +1,10 @@
 # procesamientoVisualCpp
 Cornejo Procesamiento de Imagenes<br/>
 - Echo en vsCommunity 2017
-- Tiene problemas con los colores al guardar imagnes (solo 24 bits
+- Tiene problemas con los colores al guardar imagnes (solo 24 bits)
+#10/11/17
+- Agregada libreria de video
+- envia video a la ventana desde una web cam
 # 20/10/17
 Agregadomatriz de procesamiento 3x3
 # 6/10/17
