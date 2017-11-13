@@ -144,11 +144,13 @@
     <ClCompile Include="IPImage.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix3D.cpp" />
+    <ClCompile Include="VideoProcessor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IPImage.h" />
     <ClInclude Include="Matrix3D.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="VideoProcessor.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PI2017B7M.rc" />

@@ -3,8 +3,10 @@
 #include "IPImage.h"
 #include "Matrix3D.h"
 #include "..\AtWareVC32Lib\AtWareVideoCapture.h"
-
+#include "VideoProcessor.h"
 IAtWareVideoCapture* g_pVC;
+HWND g_hVideoWnd;
+CVideoProcessor g_VP;
 /* Soft pixel shader c++ */
 CIPImage::PIXEL Shader(int i, int j, CIPImage* Inputs[], int nArgs) {
 	CIPImage::PIXEL Color = { 20,20,80,0 };
@@ -64,6 +66,30 @@ CIPImage::PIXEL Convole3x3(int i, int j, CIPImage* pInputs[], int nImputs) {
 	return R;
 }
 
+//Procedimiento de ventana adicional para el procedimiento de vista previa(Web Cam)
+LRESULT WINAPI videoProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	switch (msg)
+	{
+	case WM_CREATE:
+		return 0;
+		break;
+	case WM_SIZE:
+		if (g_pVC) {
+			RECT rc;
+			GetClientRect(hWnd, &rc);
+			g_pVC->SetPreviewWindowPosition(&rc);
+		}
+		break;
+	case WM_CLOSE:
+		return 0;
+		break;
+	default:
+		return DefWindowProc(hWnd, msg, wParam, lParam);
+		break;
+	}
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
 //1- procedimiento ventana: tiene como objetivo procesar todos los eventos que el usuao y sistema generen.
 //La iplementacion de estas repuesas define el comportamiento de la aplicacion
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -117,9 +143,20 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 			case 'V':
 				if (g_pVC->EnumAndChooseCaptureDevice()) {
+					AM_MEDIA_TYPE MT;
+					memset(&MT, 0, sizeof(MT));
+					MT.formattype = GUID_NULL;
+					MT.majortype = MEDIATYPE_Video;
+					MT.subtype = MEDIASUBTYPE_RGB32;
+					g_pVC->SetMediaType(&MT);
 					g_pVC->BuildStreamGraph();
 					g_pVC->ShowPreviewWindow(true);
+					g_pVC->GetMediaType(&g_VP.m_MT);
+					g_pVC->SetCallBack(&g_VP,1);
 					g_pVC->Start();
+					RECT rc;
+					GetClientRect(g_hVideoWnd, &rc);
+					g_pVC->SetPreviewWindowPosition(&rc);
 				}			
 				break;
 			case 'F':
@@ -230,14 +267,21 @@ ATOM RegistrarClaseVentana(HINSTANCE hInstance) {
 	wnc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wnc.lpfnWndProc = WndProc;
 	wnc.lpszClassName = L"Mi Ventana";
+	RegisterClassEx(&wnc);
+	wnc.lpfnWndProc = videoProc;
+	wnc.lpszClassName = L"VideoVentana";
 	return RegisterClassEx(&wnc);
 }
 //3- creacion y muestra de la ventana
 HWND crearVentana(HINSTANCE hInstance, int nCmdShow) {
-	HWND hWnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,L"Mi Ventana",L"Mi primer ventana en C++",WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,0,0,hInstance,0);
+	HWND hWnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,L"Mi Ventana",L"Image Processor",WS_OVERLAPPEDWINDOW,CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,0,0,hInstance,0);
 	ShowWindow(hWnd, nCmdShow);
+	hWnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW, L"VideoVentana", L"Vista Previa", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, hInstance, 0);
+	ShowWindow(hWnd, nCmdShow);
+	g_hVideoWnd = hWnd;
 	return hWnd;
 }
+
 /*4- se le delega a win main la responsabilidad de:
 registar clase ventana
 */
