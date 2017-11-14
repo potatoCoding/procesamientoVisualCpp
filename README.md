@@ -2,6 +2,8 @@
 Cornejo Procesamiento de Imagenes<br/>
 - Echo en vsCommunity 2017
 - Tiene problemas con los colores al guardar imagnes (solo 24 bits)
+#14/11/17
+- Agregada clase de image processor
 #10/11/17
 - Agregada libreria de video
 - envia video a la ventana desde una web cam
