@@ -103,6 +103,14 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	//despachar los diferentes mensajes de la ventana
 	switch (msg)
 	{
+	case WM_TIMER:
+		switch (wParam)
+		{
+			case 1:
+				InvalidateRect(hWnd, NULL, 0);
+			break;
+		}
+		break;
 	case WM_LBUTTONDOWN:
 		lastx = LOWORD(lParam);
 		lasty = HIWORD(lParam);
@@ -220,6 +228,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				RECT rc;
 				GetClientRect(hWnd, &rc);
 				CIPImage* pOutput = CIPImage::createImage(max(10, rc.right), max(10, rc.bottom));				
+				pInput = g_VP.Pull();
 				if (pInput) {
 					g_M = Transpose(						
 						
@@ -231,16 +240,18 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						Transpose(Rotation(-p))*
 						Translate((float)(pInput->getSizeX() / 2), (float)(pInput->getSizeY() / 2)));
 					//pOutput->process(Convole3x3, &pInput, 1);	
-					pOutput->process(InverseMapping, &pInput, 1);	
+					pOutput->process(InverseMapping, &pInput, 1);
+					CIPImage::destroyImage(pInput);
+					pOutput->draw(hdc, 0, 0);
 				}
 				//pOutput->process(Negative, &pInput, 1);
-				pOutput->draw(hdc, 0, 0);
 				CIPImage::destroyImage(pOutput);
 				EndPaint(hWnd, &ps);
 			}
 			return 0;
 			break;
 		case WM_CREATE:
+			SetTimer(hWnd, 1, 20, NULL);
 			return 0;
 			break;
 		case WM_DESTROY:
