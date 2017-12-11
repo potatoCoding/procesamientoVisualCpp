@@ -2,6 +2,10 @@
 Cornejo Procesamiento de Imagenes<br/>
 - Echo en vsCommunity 2017
 - Tiene problemas con los colores al guardar imagnes (solo 24 bits)
+# 11/12/17
+- Ultimo Commit
+- Proyecto funcional con teclas: N,M,O,P
+- No funciona perfectamente pero es "pasable"
 # 14/11/17
 - Agregada clase de image processor
 # 10/11/17
