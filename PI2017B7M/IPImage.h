@@ -9,9 +9,9 @@ public:
 		{
 			struct 
 			{
-				unsigned char b, g, r, a;
+				 char b, g, r, a;
 			};
-			unsigned long n;
+			 long n;
 		};
 		
 	};

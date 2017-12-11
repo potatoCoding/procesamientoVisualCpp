@@ -28,10 +28,12 @@ HRESULT CVideoProcessor::BufferCB(double SampleTime, BYTE *pBuffer, long BufferL
 	return S_OK;
 }
 
+int max_Fps = 30;
+
 void CVideoProcessor::push(CIPImage * pImage)
 {
 	EnterCriticalSection(&m_cs);
-	if (m_ImageQueue.size() >= 60) {
+	if (m_ImageQueue.size() >= max_Fps) {
 		CIPImage* pDrop = *m_ImageQueue.begin();
 			m_ImageQueue.pop_front();
 		CIPImage::destroyImage(pDrop);
@@ -44,7 +46,7 @@ CIPImage * CVideoProcessor::Pull()
 {
 	CIPImage* pImage = NULL;
 	EnterCriticalSection(&m_cs);
-	if (m_ImageQueue.size() >= 60) {
+	if (m_ImageQueue.size() >= 1) {
 		pImage = *m_ImageQueue.begin();
 		m_ImageQueue.pop_front();
 	}

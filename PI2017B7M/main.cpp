@@ -7,6 +7,8 @@
 IAtWareVideoCapture* g_pVC;
 HWND g_hVideoWnd;
 CVideoProcessor g_VP;
+int edge = 1;
+int edge_offset = 0;
 /* Soft pixel shader c++ */
 CIPImage::PIXEL Shader(int i, int j, CIPImage* Inputs[], int nArgs) {
 	CIPImage::PIXEL Color = { 20,20,80,0 };
@@ -36,12 +38,35 @@ CIPImage::PIXEL InverseMapping(int i, int j, CIPImage* pInputs[], int nImputs) {
 	return pInputs[0]->sample(dest.x, dest.y);
 }
 
+int GetTrunkedColor(int color) {
+
+	if (color>250)color = 250;
+	else if (color>200)color = 200;
+	else if (color>150)color = 150;
+	else if (color>100)color = 100;
+	else if (color>50)color = 50;
+	else color = 0;
+
+	return color;
+}
+
 float Kernel3x3[3][3] = { 
-	{0,0.25,0}, 
+	/*{0,0.25,0}, 
 	{-0.25,0,0.25},
-	{0,-0.25,0} 
+	{0,-0.25,0} */
+#define USE_A 1
+#ifdef USE_A
+	{ -1,-2,-1 },
+	{ -1,0,1 },
+	{ 1,2,1 }
+#else
+	{-1,-2,-1 },
+	{0,0,0},
+	{1,2,1}
+#endif
 };
 float C = 127;
+
 vector3D Mul(CIPImage::PIXEL p, float s) {
 	return { p.b*s, p.g*s, p.r*s, 0 };
 }
@@ -59,10 +84,87 @@ CIPImage::PIXEL Convole3x3(int i, int j, CIPImage* pInputs[], int nImputs) {
 		}
 	}
 	CIPImage::PIXEL R;
-	R.b = (unsigned char)(max(0, min(255, S.x+C)));
-	R.g = (unsigned char)(max(0, min(255, S.y+C)));
-	R.r = (unsigned char)(max(0, min(255, S.z+C)));
+	R.b = (char)(max(0, min(255, S.x+C)));
+	R.g = (char)(max(0, min(255, S.y+C)));
+	R.r = (char)(max(0, min(255, S.z+C)));
 	R.a = 0xff;
+	return R;
+}
+
+CIPImage::PIXEL Toon(int i, int j, CIPImage* pInputs[], int nImputs) {
+	CIPImage::PIXEL Color = (*pInputs[0])(i, j);
+	vector3D L = { 0,0,0,0 };
+	vector3D N = { 0,0,0,0 };
+	for (int y = -1; y < 2; y++)
+	{
+		for (int x = -1; x < 2; x++)
+		{
+			vector3D C = Mul((*pInputs[0])(i + x, j + y), Kernel3x3[y + 1][x + 1]);
+			L.x += C.x;
+			L.y += C.y;
+			L.z += C.z;
+			vector3D C1 = Mul((*pInputs[0])(i + x, j + y), 1);
+			N.x += C1.x;
+			N.y += C1.y;
+			N.z += C1.z;
+		}
+	}
+	CIPImage::PIXEL R;
+	//float intensity = 1/((N.x*L.x)+(N.y*L.y)+(L.z*N.z));
+	//float intensity = Dot((vector3D&)N, (vector3D&)L);
+#define USE_B 1
+#ifdef USE_B
+	
+	R.b = (char)(max(0, min(255, L.x + C)));
+	R.g = (char)(max(0, min(255, L.y + C)));
+	R.r = (char)(max(0, min(255, L.z + C)));
+	R.a = 0xff;
+	int prom = (R.b + R.g + R.r) / 3;
+	if (prom > edge) {
+		if (prom < edge + edge_offset) {
+			R.b = (char)(max(0, min(255, L.x - N.x + C)));
+			R.g = (char)(max(0, min(255, L.y - N.y + C)));
+			R.r = (char)(max(0, min(255, L.z - N.z + C)));
+			R.b = GetTrunkedColor((int)R.b);
+			R.g = GetTrunkedColor((int)R.g);
+			R.r = GetTrunkedColor((int)R.r);
+		}
+		else if (prom < edge + edge_offset +1) {
+			R.b = Color.b;
+			R.g = Color.g;
+			R.r = Color.r;
+		}
+		else
+		{
+			R.b = GetTrunkedColor((int)R.b);
+			R.g = GetTrunkedColor((int)R.g);
+			R.r = GetTrunkedColor((int)R.r);
+
+		}
+	}
+	else
+	{
+		R.b = Color.b;
+		R.g = Color.g;
+		R.r = Color.r;
+	}
+#else
+	R.b = (char)(max(0, min(255, L.x - N.x + C)));
+	R.g = (char)(max(0, min(255, L.y - N.y + C)));
+	R.r = (char)(max(0, min(255, L.z - N.z + C)));
+	R.a = 0xff;
+	if ((R.b + R.g + R.r) / 3 > edge) {
+		R.b = GetTrunkedColor((int)Color.b);
+		R.g = GetTrunkedColor((int)Color.g);
+		R.r = GetTrunkedColor((int)Color.r);
+	}
+	else
+	{
+		R.b = Color.b;
+		R.g = Color.g;
+		R.r = Color.r;
+	}	
+#endif
 	return R;
 }
 
@@ -188,6 +290,18 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			case 'S':
 				CIPImage::saveToFile("C:\\Users\\Carlos\\Desktop\\imagen_Guardada.bmp", pInput);
 				break;
+			case'M':
+				edge+=1;
+			break;
+			case 'N':
+				edge-=1;
+				break;
+			case'P':
+				edge_offset += 2;
+				break;
+			case 'O':
+				edge_offset -= 2;
+				break;;
 		}
 		break;
 	case WM_PAINT: 
@@ -239,12 +353,12 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						Translate((float)-(pInput->getSizeX() / 2), (float)-(pInput->getSizeY() / 2))*
 						Transpose(Rotation(-p))*
 						Translate((float)(pInput->getSizeX() / 2), (float)(pInput->getSizeY() / 2)));
+					//pOutput->process(Negative, &pInput, 1);
 					//pOutput->process(Convole3x3, &pInput, 1);	
-					pOutput->process(InverseMapping, &pInput, 1);
+					pOutput->process(Toon, &pInput, 1);
 					CIPImage::destroyImage(pInput);
 					pOutput->draw(hdc, 0, 0);
 				}
-				//pOutput->process(Negative, &pInput, 1);
 				CIPImage::destroyImage(pOutput);
 				EndPaint(hWnd, &ps);
 			}
